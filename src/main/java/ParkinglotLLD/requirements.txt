@@ -1,0 +1,30 @@
+So according to me -
+
+So the flow should be user enters the parking area, collect the ticket at entrance gate, park the vehicle in the spot of
+either 2 or 4 wheeler. Also floors of parking building could be multiple. User will park the vehicle at the spot. Once
+the user exist, he need to pay the amount at the exit gate based on the amount of time the vehicle was parked.
+
+
+
+ -- Requirements Gathering:
+
+ == Multi-Floor Parking
+ == Parking Tickets from entry point
+ == Parking fees paid at the exit point
+ == User can pay using Cash/UPI/Card
+ == A system must not allow more vehicles than the parking lot capacity.
+ == "Parking Full" message should be displayed if the parking capacity reaches max.
+ == Parking Spots - separate for 2 and 4 wheelers
+ == Fee Model - based on per hour time, and should depend on type of vehicle.
+
+
+ -- Objects Identification
+
+== Vehicle
+== Gate (Entry, Exit)
+== Ticket
+== Payment System
+== Parking Lot
+== Parking Floors
+== Parking Spots
+
