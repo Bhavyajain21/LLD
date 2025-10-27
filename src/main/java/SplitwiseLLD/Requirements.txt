@@ -1,0 +1,29 @@
+Step1:- Requirements Gathering
+
+1. Add Friends Capability
+2. Add/Manage Group
+3. Add/Manage friends inside a group.
+4. Manage expenses within/without the group
+5. Split expenses capability - equal split, unequal split, percentage wise split
+6. Balance Sheet of each user
+
+
+Step2:- Objects Identification
+
+1. Splitwise
+2. User
+3. Group
+4. Expense
+5. Split??
+6. BalanceSheet
+
+
+-- What happens when expense is created?
+
+== Lunch - 400 RS ( Paid by Bhavya )
+== Equal Type (Bhavya, F1, F2, F3) each owes 100
+
+
+-- Balance Sheet
+
+==
