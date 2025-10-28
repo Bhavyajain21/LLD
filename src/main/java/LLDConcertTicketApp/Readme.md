@@ -5,6 +5,7 @@
 Design and implement a Concert Ticket Booking System that allows users to book seats for concerts. The system should manage concert details, seat availability, and handle bookings with proper validation.
 
 ---
+<img width="854" height="1514" alt="image" src="https://github.com/user-attachments/assets/53ec1815-42f2-45c9-bb4d-4847c1af7316" />
 
 ## Requirements
 
