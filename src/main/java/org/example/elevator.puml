@@ -1,0 +1,311 @@
+@startuml
+top to bottom direction
+skinparam linetype ortho
+skinparam backgroundColor transparent
+skinparam wrapWidth 550
+skinparam roundCorner 15
+skinparam defaultFontSize 20
+skinparam defaultFontColor black
+skinparam ArrowColor black
+skinparam Padding 2
+skinparam dpi 100
+skinparam nodesep 80
+skinparam ranksep 100
+skinparam class {
+  BackgroundColor #00d084
+  BorderColor black
+  ArrowColor white
+  FontSize 25
+  BorderThickness 2
+  ArrowThickness 3
+}
+
+' Enums
+enum Direction << enumeration >> {
+  + UP
+  + DOWN
+  + IDLE
+}
+
+enum ElevatorStatus << enumeration >> {
+  + MOVING
+  + IDLE
+  + MAINTENANCE
+}
+
+' Observer Pattern
+interface ElevatorObserver << interface >> {
+  + onFloorReached(Elevator, int): void
+  + onDirectionChanged(Elevator, Direction): void
+  + onStatusChanged(Elevator, ElevatorStatus): void
+}
+
+class DisplayPanel {
+  - panelId: int
+  + DisplayPanel(int)
+  + onFloorReached(Elevator, int): void
+  + onDirectionChanged(Elevator, Direction): void
+  + onStatusChanged(Elevator, ElevatorStatus): void
+}
+
+class MonitoringSystem {
+  + onFloorReached(Elevator, int): void
+  + onDirectionChanged(Elevator, Direction): void
+  + onStatusChanged(Elevator, ElevatorStatus): void
+}
+
+' Command Pattern
+interface Command << interface >> {
+  + execute(): void
+  + undo(): void
+}
+
+class ExternalButtonPressCommand {
+  - controller: ElevatorController
+  - floor: int
+  - direction: Direction
+  + ExternalButtonPressCommand(controller, floor, direction)
+  + execute(): void
+  + undo(): void
+}
+
+class InternalButtonPressCommand {
+  - elevator: Elevator
+  - destinationFloor: int
+  + InternalButtonPressCommand(elevator, floor)
+  + execute(): void
+  + undo(): void
+}
+
+' Strategy Pattern
+interface ElevatorSelectionStrategy << interface >> {
+  + selectElevator(List<Elevator>, ElevatorRequest): Elevator
+}
+
+class OptimalElevatorStrategy {
+  + selectElevator(List<Elevator>, ElevatorRequest): Elevator
+  - calculateScore(Elevator, ElevatorRequest): int
+}
+
+class NearestElevatorStrategy {
+  + selectElevator(List<Elevator>, ElevatorRequest): Elevator
+}
+
+' State Pattern
+interface ElevatorState << interface >> {
+  + handleRequest(Elevator, int): void
+  + move(Elevator): void
+}
+
+class IdleState {
+  + handleRequest(Elevator, int): void
+  + move(Elevator): void
+}
+
+class MovingUpState {
+  + handleRequest(Elevator, int): void
+  + move(Elevator): void
+}
+
+class MovingDownState {
+  + handleRequest(Elevator, int): void
+  + move(Elevator): void
+}
+
+class MaintenanceState {
+  + handleRequest(Elevator, int): void
+  + move(Elevator): void
+}
+
+' Chain of Responsibility
+abstract class RequestHandler {
+  # nextHandler: RequestHandler
+  + setNextHandler(RequestHandler): void
+  + handle(ElevatorRequest, Elevator): boolean
+  # handleNext(ElevatorRequest, Elevator): boolean
+}
+
+class MaintenanceCheckHandler {
+  + handle(ElevatorRequest, Elevator): boolean
+}
+
+class CapacityCheckHandler {
+  + handle(ElevatorRequest, Elevator): boolean
+}
+
+class FloorValidityHandler {
+  - maxFloors: int
+  + FloorValidityHandler(int)
+  + handle(ElevatorRequest, Elevator): boolean
+}
+
+' Factory Pattern
+class ElevatorFactory << factory >> {
+  - {static} elevatorCounter: int
+  + {static} createElevator(int): Elevator
+  + {static} resetCounter(): void
+}
+
+class FloorFactory << factory >> {
+  + {static} createFloor(int, int): Floor
+}
+
+' Button Classes
+abstract class Button {
+  - id: int
+  - isPressed: boolean
+  + Button(int)
+  + press(): void
+  + reset(): void
+  + isPressed(): boolean
+}
+
+class ExternalButton {
+  - floorNumber: int
+  - direction: Direction
+  + ExternalButton(int, int, Direction)
+  + getFloorNumber(): int
+  + getDirection(): Direction
+}
+
+class InternalButton {
+  - destinationFloor: int
+  + InternalButton(int, int)
+  + getDestinationFloor(): int
+}
+
+' Core Classes
+class ElevatorRequest {
+  - sourceFloor: int
+  - direction: Direction
+  - timestamp: long
+  + ElevatorRequest(int, Direction)
+  + getSourceFloor(): int
+  + getDirection(): Direction
+  + getTimestamp(): long
+}
+
+class Elevator {
+  - id: int
+  - currentFloor: int
+  - currentDirection: Direction
+  - status: ElevatorStatus
+  - capacity: int
+  - currentLoad: int
+  - destinationFloors: List<Integer>
+  - observers: List<ElevatorObserver>
+  - currentState: ElevatorState
+  + Elevator(int, int)
+  + addObserver(ElevatorObserver): void
+  + removeObserver(ElevatorObserver): void
+  + changeState(ElevatorState): void
+  + addDestination(int): void
+  + move(): void
+  + moveToNextFloor(int): void
+  + isFull(): boolean
+  + incrementLoad(): void
+  + decrementLoad(): void
+  + setMaintenanceMode(boolean): void
+  + getId(): int
+  + getCurrentFloor(): int
+  + getCurrentDirection(): Direction
+  + getStatus(): ElevatorStatus
+}
+
+class Floor {
+  - floorNumber: int
+  - upButton: ExternalButton
+  - downButton: ExternalButton
+  + Floor(int, boolean, boolean)
+  + pressUpButton(): void
+  + pressDownButton(): void
+  + resetButtons(): void
+  + getFloorNumber(): int
+}
+
+class ElevatorController {
+  - elevators: List<Elevator>
+  - pendingRequests: Queue<ElevatorRequest>
+  - strategy: ElevatorSelectionStrategy
+  - requestHandlerChain: RequestHandler
+  - maxFloors: int
+  + ElevatorController(List<Elevator>, int)
+  + setStrategy(ElevatorSelectionStrategy): void
+  + requestElevator(int, Direction): void
+  + processPendingRequests(): void
+  + getElevators(): List<Elevator>
+}
+
+class Building << Singleton >> {
+  - {static} instance: Building
+  - totalFloors: int
+  - floors: List<Floor>
+  - controller: ElevatorController
+  - Building(int, int, int)
+  + {static} getInstance(int, int, int): Building
+  + {static} resetInstance(): void
+  + callElevator(int, Direction): void
+  + selectDestination(int, int): void
+  + displayStatus(): void
+  + setElevatorStrategy(ElevatorSelectionStrategy): void
+  + getController(): ElevatorController
+}
+
+class ElevatorSystemDemo #00bfff {
+  + main(String[]): void
+}
+
+' Relationships - Observer Pattern
+ElevatorObserver ^-[dashed]- DisplayPanel
+ElevatorObserver ^-[dashed]- MonitoringSystem
+Elevator *-[plain]-> ElevatorObserver
+
+' Relationships - Command Pattern
+Command ^-[dashed]- ExternalButtonPressCommand
+Command ^-[dashed]- InternalButtonPressCommand
+ExternalButtonPressCommand -[plain]-> ElevatorController
+InternalButtonPressCommand -[plain]-> Elevator
+
+' Relationships - Strategy Pattern
+ElevatorSelectionStrategy ^-[dashed]- OptimalElevatorStrategy
+ElevatorSelectionStrategy ^-[dashed]- NearestElevatorStrategy
+ElevatorController *-[plain]-> ElevatorSelectionStrategy
+
+' Relationships - State Pattern
+ElevatorState ^-[dashed]- IdleState
+ElevatorState ^-[dashed]- MovingUpState
+ElevatorState ^-[dashed]- MovingDownState
+ElevatorState ^-[dashed]- MaintenanceState
+Elevator *-[plain]-> ElevatorState
+
+' Relationships - Chain of Responsibility
+RequestHandler ^-[plain]- MaintenanceCheckHandler
+RequestHandler ^-[plain]- CapacityCheckHandler
+RequestHandler ^-[plain]- FloorValidityHandler
+RequestHandler *-[plain]-> RequestHandler
+ElevatorController *-[plain]-> RequestHandler
+
+' Relationships - Button Hierarchy
+Button ^-[plain]- ExternalButton
+Button ^-[plain]- InternalButton
+Floor *-[plain]-> ExternalButton
+
+' Relationships - Core
+Building *-[plain]-> Floor
+Building *-[plain]-> ElevatorController
+ElevatorController *-[plain]-> Elevator
+ElevatorController *-[plain]-> ElevatorRequest
+Elevator -[plain]-> Direction
+Elevator -[plain]-> ElevatorStatus
+ElevatorRequest -[plain]-> Direction
+
+' Relationships - Factory
+ElevatorFactory ..[plain].> Elevator : creates
+FloorFactory ..[plain].> Floor : creates
+Building -[plain]-> ElevatorFactory : uses
+Building -[plain]-> FloorFactory : uses
+
+' Relationships - Demo
+ElevatorSystemDemo -[plain]right-> Building
+
+@enduml
