@@ -1,1 +1,1 @@
-![](./elevator.png)
+![Elevator UML Diagram](./elevator.png)
